@@ -7,6 +7,14 @@
 <meta name="description" content="Sana uygun güncel iş ilanlarını hızlıca keşfet, kaydet ve başvur.">
 <!-- Ücretsiz GA4 ölçümü için content alanına Measurement ID'nizi (G-...) yazın. -->
 <meta name="ga-measurement-id" content="G-EXGZMTNV05">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EXGZMTNV05"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-EXGZMTNV05');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -732,7 +740,7 @@ footer { position: relative; color: var(--text-secondary); }
 const GA_MEASUREMENT_ID = document.querySelector('meta[name="ga-measurement-id"]')?.content.trim() || '';
 
 function initAnalytics() {
-  if (!/^G-[A-Z0-9]+$/i.test(GA_MEASUREMENT_ID)) return;
+  if (!/^G-[A-Z0-9]+$/i.test(GA_MEASUREMENT_ID) || typeof window.gtag === 'function') return;
   window.dataLayer = window.dataLayer || [];
   window.gtag = function() { window.dataLayer.push(arguments); };
   const script = document.createElement('script');
