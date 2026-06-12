@@ -1,0 +1,4 @@
+.is_jobs_seen.json
+__pycache__/
+*.pyc
+.DS_Store
