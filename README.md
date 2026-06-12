@@ -2,6 +2,8 @@
 
 Terminalden LinkedIn iş ilanı arama aracı. Login gerektirmez, LinkedIn'in misafir API'sini kullanır.
 
+Web arayüzü de var — terminal sevmeyenler için.
+
 ## Kurulum
 
 ```bash
@@ -10,7 +12,16 @@ cd is-ilan
 # Bağımlılık yok, sadece Python 3.7+
 ```
 
-## Kullanım
+## Web Arayüzü
+
+```bash
+python3 server.py
+# Tarayıcıdan http://localhost:8080
+```
+
+<img src="https://img.shields.io/badge/dark-mode-black?style=flat" />
+
+## Terminal Kullanımı
 
 ```bash
 # Temel arama
