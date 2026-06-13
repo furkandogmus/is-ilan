@@ -130,6 +130,21 @@ header .version {
 .search-row input::placeholder,
 .filter-input::placeholder { color: var(--text-secondary); font-weight: 400; }
 
+.loc-wrap { position: relative; flex: 1 1 200px; display: flex; }
+.loc-wrap input { flex: 1 1 auto; width: 100%; }
+.loc-suggest {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18); max-height: 280px; overflow-y: auto;
+}
+.loc-suggest:empty { display: none; }
+.loc-suggest div {
+  padding: 9px 14px; font-size: 14px; cursor: pointer; color: var(--text);
+  transition: background var(--transition);
+}
+.loc-suggest div:hover, .loc-suggest div.active { background: var(--bg); }
+
 .btn-search {
   background: var(--accent); color: #fff; border: none;
   border-radius: var(--radius-sm); cursor: pointer; font-weight: 700;
@@ -401,7 +416,8 @@ header .version {
 .tab-nav button.active { background: var(--accent-dim); color: var(--accent); }
 .tab-nav button:hover:not(.active) { color: var(--text); }
 .tab-content { display: none; }
-.tab-content.active { display: block; }
+/* Boş durumda footer'ı konum önerisi listesinin azami açılımının hemen altına yerleştirir */
+.tab-content.active { display: block; min-height: 240px; }
 
 /* ── Footer ── */
 footer {
@@ -650,7 +666,11 @@ footer { position: relative; color: var(--text-secondary); }
   <div class="search-box">
     <div class="search-row">
       <input type="text" id="keywords" placeholder="pozisyon, dil, teknoloji…" autofocus>
-      <input type="text" id="location" placeholder="şehir, ülke…">
+      <div class="loc-wrap">
+        <input type="text" id="location" placeholder="şehir, ülke…" autocomplete="off"
+               role="combobox" aria-autocomplete="list" aria-expanded="false">
+        <div class="loc-suggest" id="locSuggest"></div>
+      </div>
       <button class="btn-search" id="searchBtn" onclick="search()">Ara</button>
     </div>
     <div class="filters">
@@ -871,6 +891,72 @@ document.getElementById('hours').addEventListener('change', (event) => {
   syncToURL();
   trackEvent('filter_changed', { filter_name: 'hours', filter_value: event.target.value });
 });
+
+// ── Konum otomatik tamamlama (LinkedIn GEO typeahead proxy) ──
+(function initLocationAutocomplete() {
+  const input = document.getElementById('location');
+  const box = document.getElementById('locSuggest');
+  const tabNav = document.getElementById('tabNav');
+  let items = [], activeIdx = -1, debounceId = null, lastQuery = '', seq = 0;
+
+  function setTabsHidden(hidden) {
+    if (tabNav) tabNav.style.visibility = hidden ? 'hidden' : '';
+  }
+  function close() {
+    box.innerHTML = ''; items = []; activeIdx = -1;
+    input.setAttribute('aria-expanded', 'false');
+    setTabsHidden(false);
+  }
+  function render() {
+    box.innerHTML = '';
+    setTabsHidden(items.length > 0);
+    items.forEach((it, i) => {
+      const row = document.createElement('div');
+      row.textContent = it.displayName;
+      row.setAttribute('role', 'option');
+      if (i === activeIdx) row.classList.add('active');
+      row.addEventListener('mousedown', e => { e.preventDefault(); pick(i); });
+      box.appendChild(row);
+    });
+    input.setAttribute('aria-expanded', items.length ? 'true' : 'false');
+  }
+  function pick(i) {
+    const it = items[i];
+    if (!it) return;
+    input.value = it.displayName;
+    close();
+    syncToURL();
+  }
+  async function fetchHits(q) {
+    const mine = ++seq;
+    try {
+      const resp = await fetch(`/api/typeahead?q=${encodeURIComponent(q)}`);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (mine !== seq) return; // eski yanıtı yoksay
+      items = Array.isArray(data) ? data.slice(0, 8) : [];
+      activeIdx = -1;
+      render();
+    } catch (e) { /* sessizce yoksay */ }
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearTimeout(debounceId);
+    if (q.length < 2) { close(); lastQuery = q; return; }
+    if (q === lastQuery) return;
+    lastQuery = q;
+    debounceId = setTimeout(() => fetchHits(q), 250);
+  });
+  input.addEventListener('keydown', e => {
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = (activeIdx + 1) % items.length; render(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = (activeIdx - 1 + items.length) % items.length; render(); }
+    else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); pick(activeIdx); }
+    else if (e.key === 'Escape') { close(); }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.loc-wrap')) close(); });
+})();
 
 function toast(msg, type) {
   const el = document.createElement('div');
