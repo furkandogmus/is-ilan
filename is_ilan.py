@@ -71,7 +71,10 @@ SPINNER = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"]
 def color_supported():
     if os.environ.get("NO_COLOR") or os.environ.get("TERM") == "dumb":
         return False
-    return hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+    return (
+        (hasattr(sys.stdout, "isatty") and sys.stdout.isatty())
+        or (hasattr(sys.stderr, "isatty") and sys.stderr.isatty())
+    )
 
 
 def c(code, text):
@@ -86,7 +89,7 @@ def c(code, text):
 def is_blocked(html_text):
     blocks = [
         "challenge-platform", "captcha", "please verify you're not a robot",
-        "too many requests", "limit exceeded", "blocked",
+        "too many requests", "limit exceeded",
     ]
     return any(b in html_text.lower() for b in blocks)
 
@@ -525,10 +528,7 @@ def relative_time(iso_str):
     if not iso_str:
         return ""
     try:
-        # Python 3.7-3.10 fromisoformat() does not accept the 'Z' suffix.
-        # Replace it with the equivalent '+00:00' before parsing.
-        normalized = iso_str.replace("Z", "+00:00") if iso_str.endswith("Z") else iso_str
-        dt = datetime.fromisoformat(normalized)
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
     except ValueError:
         return iso_str
     now = datetime.now(timezone.utc)

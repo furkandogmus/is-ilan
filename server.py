@@ -42,11 +42,25 @@ USER_AGENTS = [
 # In-memory cache
 _cache = {}
 CACHE_TTL = 120  # seconds
+_CACHE_CLEANUP_INTERVAL = 600  # cleanup every 10 minutes
+_last_cache_cleanup = 0.0
+
+
+def _cache_cleanup():
+    global _last_cache_cleanup
+    now = time.time()
+    if now - _last_cache_cleanup < _CACHE_CLEANUP_INTERVAL:
+        return
+    expired = [k for k, v in _cache.items() if now - v["ts"] >= CACHE_TTL]
+    for k in expired:
+        del _cache[k]
+    _last_cache_cleanup = now
 
 
 def _cached(key, ttl=CACHE_TTL):
     def decorator(fn):
         def wrapper(*args, **kwargs):
+            _cache_cleanup()
             now = time.time()
             cache_key = key(*args, **kwargs) if callable(key) else key
             if cache_key in _cache and now - _cache[cache_key]["ts"] < ttl:
@@ -61,22 +75,29 @@ def _cached(key, ttl=CACHE_TTL):
 def _is_blocked(html_text):
     blocks = [
         "challenge-platform", "captcha", "please verify you're not a robot",
-        "too many requests", "limit exceeded", "blocked",
+        "too many requests", "limit exceeded",
     ]
     return any(b in html_text.lower() for b in blocks)
 
 
 def _fetch_url(url, timeout=20):
-    ua = random.choice(USER_AGENTS)
-    req = urllib.request.Request(url, headers={"User-Agent": ua})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        body = resp.read()
-        content_type = resp.headers.get("Content-Type", "")
-        if resp.status == 200 and "text/html" in content_type:
-            decoded = body.decode("utf-8", "replace")
-            if _is_blocked(decoded):
-                raise RuntimeError("LinkedIn isteği engelledi (rate limit / captcha)")
-        return body
+    for attempt in range(3):
+        ua = random.choice(USER_AGENTS)
+        req = urllib.request.Request(url, headers={"User-Agent": ua})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                body = resp.read()
+                content_type = resp.headers.get("Content-Type", "")
+                if resp.status == 200 and "text/html" in content_type:
+                    decoded = body.decode("utf-8", "replace")
+                    if _is_blocked(decoded):
+                        raise RuntimeError("LinkedIn isteği engelledi (rate limit / captcha)")
+                return body
+        except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+            if attempt < 2:
+                time.sleep(3 * (2 ** attempt))
+                continue
+            raise
 
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
@@ -205,6 +226,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(counts, ensure_ascii=False).encode())
 
+    @_cached(lambda self, job_id: f"applicant_count_{job_id}", ttl=CACHE_TTL)
     def _fetch_applicant_count(self, job_id):
         url = f"https://www.linkedin.com/jobs/view/{job_id}"
         for attempt in range(3):
