@@ -140,7 +140,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             linkedin_params["f_TPR"] = f"r{int(params['hours'][0]) * 3600}"
         if "remote" in params:
             linkedin_params["f_WT"] = "2"
-        elif "location" in params:
+        elif "location" in params and params["location"][0].strip():
             linkedin_params["location"] = params["location"][0]
 
         url = f"{API}?{urllib.parse.urlencode(linkedin_params)}"

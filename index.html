@@ -816,7 +816,8 @@ function syncFromURL() {
     const cb = document.getElementById(id);
     cb.closest('.chip').classList.toggle('active', cb.checked);
   });
-  document.getElementById('location').style.display = document.getElementById('remote').checked ? 'none' : '';
+  const locWrap = document.getElementById('location').closest('.loc-wrap');
+  if (locWrap) locWrap.style.display = document.getElementById('remote').checked ? 'none' : '';
 }
 function syncToURL() {
   const p = new URLSearchParams();
@@ -840,7 +841,10 @@ function syncToURL() {
   chip.classList.toggle('active', cb.checked);
   cb.addEventListener('change', () => {
     chip.classList.toggle('active', cb.checked);
-    if (id === 'remote') document.getElementById('location').style.display = cb.checked ? 'none' : '';
+    if (id === 'remote') {
+      const lw = document.getElementById('location').closest('.loc-wrap');
+      if (lw) lw.style.display = cb.checked ? 'none' : '';
+    }
     syncToURL();
     trackEvent('filter_changed', { filter_name: id, enabled: cb.checked ? 1 : 0 });
   });
@@ -1192,8 +1196,7 @@ async function search() {
       }
       jobs = jobs.filter(j => Number.isFinite(counts[j.id]) && counts[j.id] < 100);
     } catch(e) {
-      jobs = [];
-      toast('Başvuru sayıları doğrulanamadı; doğrulanmamış ilanlar gösterilmedi.');
+      toast('Başvuru sayıları doğrulanamadı; filtre uygulanmadan gösteriliyor.');
     }
     $('loading').style.display = 'none';
   }
