@@ -525,7 +525,10 @@ def relative_time(iso_str):
     if not iso_str:
         return ""
     try:
-        dt = datetime.fromisoformat(iso_str)
+        # Python 3.7-3.10 fromisoformat() does not accept the 'Z' suffix.
+        # Replace it with the equivalent '+00:00' before parsing.
+        normalized = iso_str.replace("Z", "+00:00") if iso_str.endswith("Z") else iso_str
+        dt = datetime.fromisoformat(normalized)
     except ValueError:
         return iso_str
     now = datetime.now(timezone.utc)
