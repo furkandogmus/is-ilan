@@ -4,18 +4,20 @@ Entegrasyon testleri: location vs remote, direkt LinkedIn vs proxy karşılaşt�
 Çalıştırmak için:
     python3 -m pytest tests/test_location_remote.py -v
 """
-import html
-import json
 import time
 import urllib.parse
 import urllib.request
+
 import pytest
 
-from is_ilan import fetch, parse_listing_page
+from is_ilan import parse_listing_page
 
 PROXY_URL = "http://127.0.0.1:8765"
 DIRECT_API = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
-USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    " (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
 
 # ── Yardımcılar ──────────────────────────────────────────────────────────────
 
@@ -79,7 +81,8 @@ class TestDirectLinkedIn:
         jobs = _fetch_results(_direct_fetch_raw, keywords="devops", location="Turkey", hours=24, remote=False)
         assert len(jobs) > 0, "En az 1 iş ilanı dönmeli"
         locs = [j["location"].lower() for j in jobs]
-        turkey_signs = sum(1 for l in locs if "türkiye" in l or "turkey" in l or "istanbul" in l or "ankara" in l or "izmir" in l)
+        tr_keywords = ("türkiye", "turkey", "istanbul", "ankara", "izmir")
+        turkey_signs = sum(1 for loc in locs if any(k in loc for k in tr_keywords))
         assert turkey_signs >= len(jobs) * 0.7, (
             f"İlanların en az %70'i Türkiye lokasyonlu olmalı. "
             f"{turkey_signs}/{len(jobs)} Türkiye işareti taşıyor. "
@@ -93,10 +96,10 @@ class TestDirectLinkedIn:
         # Remote ilanlarda lokasyon farklı ülkelerden olabilir
         locs = [j["location"] for j in jobs]
         countries = set()
-        for l in locs:
-            if "united states" in l.lower() or ", us" in l.lower():
+        for loc in locs:
+            if "united states" in loc.lower() or ", us" in loc.lower():
                 countries.add("US")
-            elif "türkiye" in l.lower() or "turkey" in l.lower():
+            elif "türkiye" in loc.lower() or "turkey" in loc.lower():
                 countries.add("TR")
             else:
                 countries.add("OTHER")
@@ -119,7 +122,7 @@ class TestDirectLinkedIn:
         jobs = _fetch_results(_direct_fetch_raw, keywords="devops", location="Istanbul", hours=72, remote=False)
         assert len(jobs) > 0, "Istanbul aramasında sonuç dönmeli"
         locs = [j["location"].lower() for j in jobs]
-        istanbul = sum(1 for l in locs if "istanbul" in l)
+        istanbul = sum(1 for loc in locs if "istanbul" in loc)
         assert istanbul >= len(jobs) * 0.6, (
             f"Çoğu ilan Istanbul lokasyonlu olmalı. "
             f"{istanbul}/{len(jobs)} İstanbul. {locs[:5]}"
@@ -131,10 +134,10 @@ class TestDirectLinkedIn:
         assert len(jobs) > 0, "Global aramada sonuç dönmeli"
         locs = [j["location"].lower() for j in jobs]
         countries = []
-        for l in locs:
-            if "turkey" in l or "türkiye" in l:
+        for loc in locs:
+            if "turkey" in loc or "türkiye" in loc:
                 countries.append("TR")
-            elif "united states" in l or ", us" in l or ", tx" in l or ", ny" in l:
+            elif "united states" in loc or ", us" in loc or ", tx" in loc or ", ny" in loc:
                 countries.append("US")
             else:
                 countries.append("OTHER")
@@ -257,7 +260,12 @@ class TestParseJobStructure:
 
     def test_html_entities_decoded(self):
         """HTML entity'leri decode edilmeli (&amp; → &)."""
-        html_sample = '<div data-entity-urn="urn:li:jobPosting:123"><h3 class="base-search-card__title">DevOps &amp; Cloud</h3><h4 class="base-search-card__subtitle"><a>Test Corp</a></h4><span class="job-search-card__location">Remote</span></div>'
+        html_sample = (
+            '<div data-entity-urn="urn:li:jobPosting:123">'
+            '<h3 class="base-search-card__title">DevOps &amp; Cloud</h3>'
+            '<h4 class="base-search-card__subtitle"><a>Test Corp</a></h4>'
+            '<span class="job-search-card__location">Remote</span></div>'
+        )
         jobs = parse_listing_page(html_sample)
         assert len(jobs) == 1
         assert jobs[0]["title"] == "DevOps & Cloud"
@@ -329,7 +337,8 @@ class TestFilteringLogic:
         assert len(jobs) > 0
         # Sonuçlar zaten API tarafından filtrelenmiş olmalı
         locs = [j["location"] for j in jobs]
-        has_turkey = any("türkiye" in l.lower() or "turkey" in l.lower() or "istanbul" in l.lower() for l in locs)
+        tr_words = ("türkiye", "turkey", "istanbul")
+        has_turkey = any(any(k in loc.lower() for k in tr_words) for loc in locs)
         assert has_turkey, "Türkiye lokasyon filtresi Türkiye ilanları döndürmeli"
 
 
@@ -344,7 +353,13 @@ class TestEdgeCases:
 
     def test_special_characters_in_title(self):
         """Özel karakterli başlıklar parse edilebilmeli."""
-        html_sample = '<div data-entity-urn="urn:li:jobPosting:123"><h3 class="base-search-card__title">C++ Developer (m/w/d)</h3><h4 class="base-search-card__subtitle"><a>Tech GmbH</a></h4><span class="job-search-card__location">Berlin</span></div><time datetime="2026-01-01T00:00:00Z"></time>'
+        html_sample = (
+            '<div data-entity-urn="urn:li:jobPosting:123">'
+            '<h3 class="base-search-card__title">C++ Developer (m/w/d)</h3>'
+            '<h4 class="base-search-card__subtitle"><a>Tech GmbH</a></h4>'
+            '<span class="job-search-card__location">Berlin</span></div>'
+            '<time datetime="2026-01-01T00:00:00Z"></time>'
+        )
         jobs = parse_listing_page(html_sample)
         assert len(jobs) == 1
         assert "C++" in jobs[0]["title"]
@@ -352,7 +367,12 @@ class TestEdgeCases:
 
     def test_company_without_link(self):
         """Şirket adı <a> etiketi olmadan da parse edilebilmeli."""
-        html_sample = '<div data-entity-urn="urn:li:jobPosting:999"><h3 class="base-search-card__title">Test Role</h3><h4 class="base-search-card__subtitle">Plain Text Company</h4><span class="job-search-card__location">Remote</span></div>'
+        html_sample = (
+            '<div data-entity-urn="urn:li:jobPosting:999">'
+            '<h3 class="base-search-card__title">Test Role</h3>'
+            '<h4 class="base-search-card__subtitle">Plain Text Company</h4>'
+            '<span class="job-search-card__location">Remote</span></div>'
+        )
         jobs = parse_listing_page(html_sample)
         assert len(jobs) == 1
         assert jobs[0]["company"] == "Plain Text Company"
