@@ -24,6 +24,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 API = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+TYPEAHEAD = "https://www.linkedin.com/jobs-guest/api/typeaheadHits"
 
 USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
@@ -93,6 +94,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._proxy_applicants(parsed.query)
             return
 
+        if parsed.path == "/api/typeahead":
+            self._proxy_typeahead(parsed.query)
+            return
+
         if parsed.path == "/" or parsed.path == "":
             self.path = "/index.html"
 
@@ -139,6 +144,35 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(f"Proxy error: {e}".encode())
+
+    def _proxy_typeahead(self, query_string):
+        params = urllib.parse.parse_qs(query_string)
+        query = params.get("q", [""])[0].strip()
+
+        if len(query) < 2:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(b"[]")
+            return
+
+        url = f"{TYPEAHEAD}?{urllib.parse.urlencode({'query': query, 'typeaheadType': 'GEO'})}"
+
+        try:
+            body = self._do_fetch(url)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", f"max-age={CACHE_TTL}")
+            self.end_headers()
+            self.wfile.write(body)
+        except Exception as e:
+            self.send_response(502)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
 
     def log_message(self, format, *args):
         print(f"  {args[0]}")

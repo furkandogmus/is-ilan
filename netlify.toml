@@ -10,3 +10,8 @@
   from = "/api/applicants"
   to = "/.netlify/functions/applicants"
   status = 200
+
+[[redirects]]
+  from = "/api/typeahead"
+  to = "/.netlify/functions/typeahead"
+  status = 200
