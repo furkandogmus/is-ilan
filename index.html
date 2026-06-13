@@ -615,34 +615,35 @@ footer { position: relative; color: var(--text-secondary); }
     <div class="logo">⌖</div>
     <div class="header-copy">
       <h1><span>İlan</span>Rotası</h1>
-      <small>İyi ilana giden yol burada.</small>
+      <small data-i18n="tagline">İyi ilana giden yol burada.</small>
     </div>
     <span class="version">v2.0</span>
+    <button class="theme-toggle" id="langToggle" onclick="setLang(_lang==='tr'?'en':'tr')" aria-label="Dil değiştir">EN</button>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Tema değiştir">🌙</button>
   </header>
 
   <div class="search-box">
     <div class="search-row">
-      <input type="text" id="keywords" placeholder="pozisyon, dil, teknoloji…" autofocus>
+      <input type="text" id="keywords" data-i18n-placeholder="search_placeholder" placeholder="pozisyon, dil, teknoloji…" autofocus>
       <div class="loc-wrap">
-        <input type="text" id="location" placeholder="şehir, ülke…" autocomplete="off"
+        <input type="text" id="location" data-i18n-placeholder="location_placeholder" placeholder="şehir, ülke…" autocomplete="off"
                role="combobox" aria-autocomplete="list" aria-expanded="false">
         <div class="loc-suggest" id="locSuggest"></div>
       </div>
-      <button class="btn-search" id="searchBtn" onclick="search()">Ara</button>
+      <button class="btn-search" id="searchBtn" onclick="search()" data-i18n="search_btn">Ara</button>
     </div>
     <div class="filters">
       <label class="chip" id="chipRemote">
-        <input type="checkbox" id="remote"><span class="chip-icon">🏠</span> Remote
+        <input type="checkbox" id="remote"><span class="chip-icon">🏠</span> <span data-i18n="remote">Remote</span>
       </label>
       <label class="chip" id="chipReposts">
-        <input type="checkbox" id="noReposts"> Repost'ları gizle
+        <input type="checkbox" id="noReposts"> <span data-i18n="hide_reposts">Repost'ları gizle</span>
       </label>
       <label class="chip" id="chipFew">
-        <input type="checkbox" id="fewApplicants"> ⬇100 başvuru
+        <input type="checkbox" id="fewApplicants"> <span data-i18n="few_applicants">⬇100 başvuru</span>
       </label>
       <label class="chip" id="chipAll">
-        <input type="checkbox" id="allResults"> Geçmişi dahil et
+        <input type="checkbox" id="allResults"> <span data-i18n="include_history">Geçmişi dahil et</span>
       </label>
       <span class="chip">
         <select class="chip-num" id="hours" aria-label="İlan zamanı">
@@ -654,7 +655,7 @@ footer { position: relative; color: var(--text-secondary); }
       </span>
     </div>
     <div class="suggestions" id="suggestions">
-      <span class="label">Hızlı ara:</span>
+      <span class="label" data-i18n="quick_search">Hızlı ara:</span>
       <button class="suggestion-chip" onclick="quickSearch('python')">python</button>
       <button class="suggestion-chip" onclick="quickSearch('devops')">devops</button>
       <button class="suggestion-chip" onclick="quickSearch('react')">react</button>
@@ -664,9 +665,9 @@ footer { position: relative; color: var(--text-secondary); }
   </div>
 
   <div class="tab-nav" id="tabNav">
-    <button class="active" onclick="switchTab('search', this)">Arama</button>
+    <button class="active" onclick="switchTab('search', this)" data-i18n="tab_search">Arama</button>
     <button onclick="switchTab('favorites', this)" id="favTabBtn">
-      Kaydedilenler
+      <span data-i18n="tab_favorites">Kaydedilenler</span>
       <span id="favCount" style="display:none;background:var(--accent);color:#fff;border-radius:99px;padding:0 6px;font-size:10px;margin-left:3px">0</span>
     </button>
   </div>
@@ -675,7 +676,7 @@ footer { position: relative; color: var(--text-secondary); }
     <div id="error" class="error-box" style="display:none"></div>
 
     <div id="loading" class="loading" style="display:none">
-      <span class="spinner"></span><span id="loadingText">Aranıyor…</span>
+      <span class="spinner"></span><span id="loadingText" data-i18n="loading_default">Aranıyor…</span>
     </div>
 
     <ul id="skeletonList" class="skeleton-list" style="display:none">
@@ -688,12 +689,12 @@ footer { position: relative; color: var(--text-secondary); }
 
     <ul id="results" class="job-list"></ul>
     <div id="scrollSentinel"></div>
-    <div id="loadingMore" class="loading" style="display:none"><span class="spinner"></span>Daha fazla yükleniyor…</div>
+    <div id="loadingMore" class="loading" style="display:none"><span class="spinner"></span><span data-i18n="loading_more">Daha fazla yükleniyor…</span></div>
 
     <div id="empty" class="empty-state" style="display:none">
       <div class="icon">🍃</div>
-      <p>Rüzgâr esse de ilan gelmedi.</p>
-      <p class="sub">Farklı anahtar kelimeler veya konumla tekrar deneyin.</p>
+      <p data-i18n="no_results">Rüzgâr esse de ilan gelmedi.</p>
+      <p class="sub" data-i18n="no_results_sub">Farklı anahtar kelimeler veya konumla tekrar deneyin.</p>
     </div>
   </div>
 
@@ -701,8 +702,8 @@ footer { position: relative; color: var(--text-secondary); }
     <ul id="favResults" class="job-list"></ul>
     <div id="favEmpty" class="empty-state">
       <div class="icon">🤍</div>
-      <p>Henüz kaydedilmiş ilan yok.</p>
-      <p class="sub">İlan kartındaki ♡ butonuna tıklayarak kaydedebilirsiniz.</p>
+      <p data-i18n="no_favs">Henüz kaydedilmiş ilan yok.</p>
+      <p class="sub" data-i18n="no_favs_sub">İlan kartındaki ♡ butonuna tıklayarak kaydedebilirsiniz.</p>
     </div>
   </div>
 
@@ -715,6 +716,164 @@ footer { position: relative; color: var(--text-secondary); }
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
+// ── i18n ──────────────────────────────────────────────────────────────────────
+const I18N = {
+  tr: {
+    site_name: "İlanRotası",
+    tagline: "İyi ilana giden yol burada.",
+    search_placeholder: "pozisyon, dil, teknoloji…",
+    location_placeholder: "şehir, ülke…",
+    search_btn: "Ara",
+    remote: "🏠 Remote",
+    hide_reposts: "Repost'ları gizle",
+    few_applicants: "⬇100 başvuru",
+    include_history: "Geçmişi dahil et",
+    quick_search: "Hızlı ara:",
+    tab_search: "Arama",
+    tab_favorites: "Kaydedilenler",
+    loading_default: "Aranıyor…",
+    checking_applicants: "Başvuru sayıları kontrol ediliyor…",
+    loading_more: "Daha fazla yükleniyor…",
+    loading_msgs: [
+      "İlanların arasındaki en utangaç DevOps aranıyor…",
+      "Kariyer kazanına biraz kahve, biraz YAML ekleniyor…",
+      "Remote ilanlar dürbünle ufukta aranıyor…",
+      "İK'nın \"dinamik ekip\" dediği şey çözülmeye çalışılıyor…",
+      "Sunuculara nazikçe \"iş var mı?\" diye soruluyor…",
+      "CV'niz için manzaralı bir masa bakılıyor…",
+      "Maaşı yazan ilan bulunursa küçük bir kutlama yapılacak…",
+      "Toplantısı az, huzuru bol işler ayıklanıyor…",
+    ],
+    save: "Kaydet",
+    saved: "Kaydedildi",
+    unsave: "Kaydedilenlerden çıkar",
+    job_save: "İlanı kaydet",
+    no_results: "Rüzgâr esse de ilan gelmedi.",
+    no_results_sub: "Farklı anahtar kelimeler veya konumla tekrar deneyin.",
+    no_favs: "Henüz kaydedilmiş ilan yok.",
+    no_favs_sub: "İlan kartındaki ♡ butonuna tıklayarak kaydedebilirsiniz.",
+    error_rate_limit: "LinkedIn isteği engelledi (rate limit)",
+    error_rate_limit_full: "LinkedIn isteği engelledi (rate limit). Bir süre bekleyip tekrar deneyin.",
+    error_server: "Sunucuyu kontrol edin",
+    error_applicants: "Başvuru sayıları doğrulanamadı; filtre uygulanmadan gösteriliyor.",
+    modal_location: "Konum",
+    modal_posted: "Yayınlanma",
+    modal_position: "Pozisyon",
+    modal_position_text: "{company} şirketi, {title} pozisyonu için ekip arkadaşı arıyor.",
+    modal_view_linkedin: "LinkedIn'de görüntüle ↗",
+    modal_save: "♡ Kaydet",
+    modal_saved: "♥ Kaydedildi",
+    toast_saved: "Kaydedildi!",
+    toast_unsaved: "Kaydedilenlerden çıkarıldı!",
+    hours: { "1": "son 1 saat", "6": "son 6 saat", "12": "son 12 saat", "24": "son 24 saat" },
+    time_now: "az önce",
+    time_min: "{n} dk önce",
+    time_hour: "{n} saat önce",
+    time_day: "{n} gün önce",
+    time_week: "{n} hafta önce",
+  },
+  en: {
+    site_name: "İlanRotası",
+    tagline: "The road to the right job.",
+    search_placeholder: "position, language, technology…",
+    location_placeholder: "city, country…",
+    search_btn: "Search",
+    remote: "🏠 Remote",
+    hide_reposts: "Hide reposts",
+    few_applicants: "⬇100 applicants",
+    include_history: "Include history",
+    quick_search: "Quick search:",
+    tab_search: "Search",
+    tab_favorites: "Saved",
+    loading_default: "Searching…",
+    checking_applicants: "Checking applicant counts…",
+    loading_more: "Loading more…",
+    loading_msgs: [
+      "Searching for the shyest DevOps among listings…",
+      "Adding some coffee and YAML to the career cauldron…",
+      "Scanning the horizon for remote jobs…",
+      "Decoding what HR means by \"dynamic team\"…",
+      "Politely asking the servers \"any jobs?\"…",
+      "Looking for a desk with a view for your resume…",
+      "A small celebration will be held if we find a salary…",
+      "Filtering jobs with fewer meetings and more peace…",
+    ],
+    save: "Save",
+    saved: "Saved",
+    unsave: "Remove from saved",
+    job_save: "Save job",
+    no_results: "No jobs found — just the wind blowing.",
+    no_results_sub: "Try different keywords or a different location.",
+    no_favs: "No saved jobs yet.",
+    no_favs_sub: "Click the ♡ button on a job card to save it.",
+    error_rate_limit: "LinkedIn blocked the request (rate limit)",
+    error_rate_limit_full: "LinkedIn blocked the request. Wait a moment and try again.",
+    error_server: "Check the server",
+    error_applicants: "Could not verify applicant counts; showing unfiltered results.",
+    modal_location: "Location",
+    modal_posted: "Posted",
+    modal_position: "Position",
+    modal_position_text: "{company} is looking for a {title} to join the team.",
+    modal_view_linkedin: "View on LinkedIn ↗",
+    modal_save: "♡ Save",
+    modal_saved: "♥ Saved",
+    toast_saved: "Saved!",
+    toast_unsaved: "Removed from saved!",
+    hours: { "1": "last 1 hr", "6": "last 6 hrs", "12": "last 12 hrs", "24": "last 24 hrs" },
+    time_now: "just now",
+    time_min: "{n} min ago",
+    time_hour: "{n} hr ago",
+    time_day: "{n} days ago",
+    time_week: "{n} weeks ago",
+  },
+};
+
+let _lang = (function detectLang() {
+  const saved = localStorage.getItem("is_ilan_lang");
+  if (saved === "en" || saved === "tr") return saved;
+  const nav = (navigator.language || "").toLowerCase();
+  return nav.startsWith("tr") ? "tr" : "en";
+})();
+
+function t(key, vars) {
+  let s = (I18N[_lang] && I18N[_lang][key]) || (I18N.en[key]) || key;
+  if (!vars) return s;
+  for (const [k, v] of Object.entries(vars)) s = s.replace("{" + k + "}", v);
+  return s;
+}
+
+function setLang(lang) {
+  if (lang !== "en" && lang !== "tr") return;
+  _lang = lang;
+  localStorage.setItem("is_ilan_lang", lang);
+  translatePage();
+  document.getElementById("langToggle").textContent = lang === "tr" ? "EN" : "TR";
+  if (allJobs.length) { visibleCount = Math.min(PAGE_SIZE, allJobs.length); renderVisible(); }
+  if (document.getElementById("tabFavorites").classList.contains("active")) renderFavorites();
+  trackEvent("language_changed", { language: lang });
+}
+
+function translatePage() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    const s = t(key);
+    if (s !== key) el.textContent = s;
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    el.title = t(el.getAttribute("data-i18n-title"));
+  });
+  const hoursSelect = document.getElementById("hours");
+  if (hoursSelect) {
+    Array.from(hoursSelect.options).forEach(opt => {
+      const hk = t("hours");
+      if (typeof hk === "object" && hk[opt.value]) opt.textContent = hk[opt.value];
+    });
+  }
+}
+
 const GA_MEASUREMENT_ID = document.querySelector('meta[name="ga-measurement-id"]')?.content.trim() || '';
 
 function initAnalytics() {
@@ -747,25 +906,18 @@ let sortKey = 'listed';
 let sortDir = -1;
 let isLoadingMore = false;
 
-const LOADING_MSGS = [
-  'İlanların arasındaki en utangaç DevOps aranıyor…',
-  'Kariyer kazanına biraz kahve, biraz YAML ekleniyor…',
-  'Remote ilanlar dürbünle ufukta aranıyor…',
-  'İK’nın “dinamik ekip” dediği şey çözülmeye çalışılıyor…',
-  'Sunuculara nazikçe “iş var mı?” diye soruluyor…',
-  'CV’niz için manzaralı bir masa bakılıyor…',
-  'Maaşı yazan ilan bulunursa küçük bir kutlama yapılacak…',
-  'Toplantısı az, huzuru bol işler ayıklanıyor…',
-];
+const LOADING_MSGS = []; // filled at load time via t()
 let loadingMessageTimer = null;
 
 function startLoadingBanter() {
+  const msgs = t("loading_msgs");
+  if (!Array.isArray(msgs)) return;
   let last = -1;
   const update = () => {
     let next;
-    do { next = Math.floor(Math.random() * LOADING_MSGS.length); } while (next === last && LOADING_MSGS.length > 1);
+    do { next = Math.floor(Math.random() * msgs.length); } while (next === last && msgs.length > 1);
     last = next;
-    document.getElementById('loadingText').textContent = LOADING_MSGS[next];
+    document.getElementById('loadingText').textContent = msgs[next];
   };
   update();
   clearInterval(loadingMessageTimer);
@@ -791,6 +943,8 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', 'dark');
     document.getElementById('themeToggle').textContent = '☀️';
   }
+  document.getElementById('langToggle').textContent = _lang === 'tr' ? 'EN' : 'TR';
+  translatePage();
 })();
 
 function switchTab(name, btn) {
@@ -942,12 +1096,15 @@ function relativeTime(iso) {
   if (!iso) return '';
   try {
     const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-    if (mins < 1) return 'az önce';
-    if (mins < 60) return mins + 'dk önce';
+    if (mins < 1) return t('time_now');
+    if (mins < 60) return t('time_min', { n: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + 'sa önce';
+    if (hrs < 24) return t('time_hour', { n: hrs });
     const days = Math.floor(hrs / 24);
-    return days < 7 ? days + 'g önce' : new Date(iso).toLocaleDateString('tr-TR');
+    if (days < 7) return t('time_day', { n: days });
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return t('time_week', { n: weeks });
+    return new Date(iso).toLocaleDateString(_lang === 'tr' ? 'tr-TR' : 'en-US');
   } catch { return iso; }
 }
 
@@ -1027,9 +1184,9 @@ function renderJobs(jobs, seenSet, favSet) {
           ${j.listed ? '<span class="sep">·</span><span class="time">'+relativeTime(j.listed)+'</span>' : ''}
         </div>
       </div>
-      <button class="btn-fav ${isFav ? 'faved' : ''}" aria-label="${isFav ? 'Kaydedilenlerden çıkar' : 'İlanı kaydet'}" onclick="event.stopPropagation();toggleFav('${encodeURIComponent(JSON.stringify(j))}')">
+      <button class="btn-fav ${isFav ? 'faved' : ''}" aria-label="${isFav ? t('unsave') : t('job_save')}" onclick="event.stopPropagation();toggleFav('${encodeURIComponent(JSON.stringify(j))}')">
         <span class="fav-icon">${isFav ? '♥' : '♡'}</span>
-        <span class="fav-label">${isFav ? 'Kaydedildi' : 'Kaydet'}</span>
+        <span class="fav-label">${isFav ? t('saved') : t('save')}</span>
       </button>
     </li>`;
   }).join('');
@@ -1057,16 +1214,16 @@ function openModal(jobStr) {
       <h2>${escapeHtml(j.title)}</h2>
       <div class="modal-company">${escapeHtml(j.company)}</div>
       <div class="modal-row modal-section">
-        ${j.location ? `<div class="modal-info-item"><div class="modal-label">Konum</div><p>${escapeHtml(j.location)}</p></div>` : ''}
-        ${j.listed ? `<div class="modal-info-item"><div class="modal-label">Yayınlanma</div><p>${relativeTime(j.listed)}</p></div>` : ''}
+        ${j.location ? `<div class="modal-info-item"><div class="modal-label">${t('modal_location')}</div><p>${escapeHtml(j.location)}</p></div>` : ''}
+        ${j.listed ? `<div class="modal-info-item"><div class="modal-label">${t('modal_posted')}</div><p>${relativeTime(j.listed)}</p></div>` : ''}
       </div>
       <div class="modal-section">
-        <div class="modal-label">Pozisyon</div>
-        <p>${escapeHtml(j.company)} şirketi, ${escapeHtml(j.title)} pozisyonu için ekip arkadaşı arıyor.</p>
+        <div class="modal-label">${t('modal_position')}</div>
+        <p>${escapeHtml(t('modal_position_text', { company: j.company, title: j.title }))}</p>
       </div>
       <div class="modal-actions">
-        <a class="btn-primary" href="${escapeHtml(j.url)}" target="_blank" rel="noopener" onclick="trackEvent('job_outbound_clicked')">LinkedIn'de görüntüle ↗</a>
-        <button class="btn-secondary" onclick="event.stopPropagation();toggleFav('${encodeURIComponent(JSON.stringify(j))}');this.closest('.modal-overlay').remove()">${isFav ? '♥ Kaydedildi' : '♡ Kaydet'}</button>
+        <a class="btn-primary" href="${escapeHtml(j.url)}" target="_blank" rel="noopener" onclick="trackEvent('job_outbound_clicked')">${t('modal_view_linkedin')}</a>
+        <button class="btn-secondary" onclick="event.stopPropagation();toggleFav('${encodeURIComponent(JSON.stringify(j))}');this.closest('.modal-overlay').remove()">${isFav ? t('modal_saved') : t('modal_save')}</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -1185,7 +1342,7 @@ async function search() {
 
   if (fewApplicants && jobs.length) {
     $('loading').style.display = 'flex';
-    $('loadingText').textContent = 'Başvuru sayıları kontrol ediliyor…';
+    $('loadingText').textContent = t('checking_applicants');
     try {
       const counts = {};
       for (let i = 0; i < jobs.length; i += 50) {
@@ -1196,7 +1353,7 @@ async function search() {
       }
       jobs = jobs.filter(j => Number.isFinite(counts[j.id]) && counts[j.id] < 100);
     } catch(e) {
-      toast('Başvuru sayıları doğrulanamadı; filtre uygulanmadan gösteriliyor.');
+      toast(t('error_applicants'));
     }
     $('loading').style.display = 'none';
   }
@@ -1206,8 +1363,8 @@ async function search() {
   if (fetchError && !jobs.length) {
     trackEvent('search_failed', { error_type: fetchError.includes('LinkedIn') ? 'rate_limit' : 'request_error' });
     $('error').innerHTML = fetchError.includes('LinkedIn')
-      ? '⚠️ ' + fetchError + '. Bir süre bekleyip tekrar deneyin.'
-      : '⚠️ ' + fetchError + '. Sunucuyu kontrol edin (<code>python3 server.py</code>).';
+      ? '⚠️ ' + t('error_rate_limit_full')
+      : '⚠️ ' + fetchError + '. ' + t('error_server') + ' (<code>python3 server.py</code>).';
     $('error').style.display = 'block';
     return;
   }
